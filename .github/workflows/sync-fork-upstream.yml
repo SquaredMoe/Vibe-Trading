@@ -54,11 +54,20 @@ jobs:
             exit 0
           fi
 
-          if ! git merge --no-edit --no-ff refs/remotes/upstream/auto-sync; then
+          # GitHub's built-in GITHUB_TOKEN cannot update .github/workflows files.
+          # Merge new upstream code, but keep our existing workflow definitions.
+          if ! git merge --no-commit --no-ff refs/remotes/upstream/auto-sync; then
             git merge --abort || true
             echo "Conflict merging ${parent} into ${TARGET_BRANCH}. No changes pushed; resolve manually." >> "${GITHUB_STEP_SUMMARY}"
             exit 1
           fi
 
+          workflow_changes="$(git diff --cached --name-only -- .github/workflows | wc -l)"
+          if (( workflow_changes > 0 )); then
+            git restore --source=HEAD --staged --worktree -- .github/workflows
+            echo "Preserved ${workflow_changes} local workflow file(s): upstream workflow updates skipped because GITHUB_TOKEN lacks Workflows permission." >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+          git commit -m "chore(sync): merge upstream changes"
           git push origin "HEAD:refs/heads/${TARGET_BRANCH}"
-          echo "Updated from ${parent} (${parent_branch}); existing fork commits preserved." >> "${GITHUB_STEP_SUMMARY}"
+          echo "Updated from ${parent} (${parent_branch}) without overwriting existing commits or GitHub workflow files." >> "${GITHUB_STEP_SUMMARY}"
