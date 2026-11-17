@@ -26,6 +26,11 @@
 </p>
 
 <p align="center">
+  <a href="https://pepy.tech/projects/vibe-trading-ai"><img src="https://static.pepy.tech/badge/vibe-trading-ai" alt="PyPI total downloads"></a>
+  <img src="https://visitor-badge.laobi.icu/badge?page_id=HKUDS.Vibe-Trading&amp;left_text=README%20views" alt="README views">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Backend-FastAPI-009688?style=flat" alt="FastAPI">
   <img src="https://img.shields.io/badge/Frontend-React%2019-61DAFB?style=flat&logo=react&logoColor=white" alt="React">
@@ -57,17 +62,20 @@
 
 ## 📰 Berita
 
+- **2026-11-17** 📊 **Rincian risiko portofolio dan analisis opsi yang dapat digunakan kembali** — Risk X-Ray menambahkan periode drawdown teramati dan kontribusi volatilitas bertanda per posisi. Options Lab mengekspor snapshot hasil perhitungan sebagai JSON dan grid skenario sebagai CSV, serta mendiagnosis irisan IV teramati dengan batas cakupan yang jelas; hasilnya bukan sertifikasi permukaan bebas arbitrase. Tool Agent/MCP membandingkan strategi bernama pada grid harga dan IV bersama.
+  Memperbaiki penanganan metadata pembaruan tidak valid dan kegagalan verifikasi upgrade, penemuan model dalam mode langsung, nama lampiran, penanganan harga yang hilang, serta respons daftar sesi yang kedaluwarsa. **Tersedia di `main`, untuk rilis pip berikutnya.**
+
 - **2026-11-16** 🛠️ **Perbaikan laporan, pencarian memori, dan pesan** — Laporan Shadow Account menandai laba/rugi yang belum terukur sebagai tidak tersedia, bukan nol, termasuk dalam ekspor HTML/PDF yang tersimpan di cache. Pencarian memori memperbaiki indeks lama; kegagalan sebagian OCR PDF ditandai sebagai penurunan kualitas.
   Memperbaiki pemasangan Signal dan hilangnya teks Napcat akibat metadata gambar yang tidak valid. Percobaan ulang pengaturan suhu Anthropic dibatasi pada kesalahan validasi terkait, dan API historis AKShare versi baru maupun lama didukung. Lihat [CHANGELOG](CHANGELOG.md). **Tersedia di `main` untuk rilis pip berikutnya.**
 
 - **2026-11-15** 📡 **Gateway data pasar terpadu dan CSV siap pakai** — Bar historis dan snapshot opsi AS menggunakan satu [gateway data lokal](agent/src/data_gateway/README.md) dengan sumber cadangan, cache bersama, dan batas konkurensi. Respons mempertahankan sumber, mata uang, dan metode penyesuaian harga, serta menjelaskan cakupan dan keterkinian data.
   Pengambilan data pasar oleh Agent menyediakan CSV bersama JSON. Untuk permintaan yang didukung dengan instrumen dan satu rentang tanggal `YYYY-MM-DD` yang eksplisit, runtime membatasi tanggal sebelum pengambilan data. Data awal untuk perhitungan diminta secara terpisah; periode historis yang dibutuhkan indikator dan backtest yang ada tetap tersedia. **Tersedia di `main` untuk rilis pip berikutnya.**
 
-- **2026-11-14** 🔌 **Gateway LLM terpadu dan pemeriksaan versi** — Agent, CLI, API, dan Swarm kini menggunakan satu katalog dan lapisan konfigurasi untuk penyedia model. Pengaturan setiap klien tetap terisolasi, adaptor native mematuhi pengaturan proxy eksplisit, dan pengalihan lintas origin diblokir sebelum kredensial atau isi permintaan diteruskan.
-  Periksa versi baru melalui pengaturan Web. Desktop kini mendukung pembaruan bertanda tangan digital dengan verifikasi dan pemulihan; distribusinya memerlukan konfigurasi feed pembaruan dan sertifikat penerbit. **Sudah di `main`, untuk rilis pip berikutnya.**
-
 <details>
 <summary>Berita sebelumnya</summary>
+
+- **2026-11-14** 🔌 **Gateway LLM terpadu dan pemeriksaan versi** — Agent, CLI, API, dan Swarm kini menggunakan satu katalog dan lapisan konfigurasi untuk penyedia model. Pengaturan setiap klien tetap terisolasi, adaptor native mematuhi pengaturan proxy eksplisit, dan pengalihan lintas origin diblokir sebelum kredensial atau isi permintaan diteruskan.
+  Periksa versi baru melalui pengaturan Web. Desktop kini mendukung pembaruan bertanda tangan digital dengan verifikasi dan pemulihan; distribusinya memerlukan konfigurasi feed pembaruan dan sertifikat penerbit. **Sudah di `main`, untuk rilis pip berikutnya.**
 
 - **2026-11-13** 🛠️ **Penyampaian riset dan alat kalkulasi** — Jawaban riset dialirkan tanpa penghapusan angka otomatis, penulisan ulang paksa, atau penilaian selesai berdasarkan format. Eksekusi komite yang terhenti menyimpan hasil parsial dan dapat melanjutkan peran yang belum selesai dengan memakai kembali pekerjaan yang sudah selesai.
   Referensi data pasar lengkap terhubung ke kalkulasi QuantLib tanpa shell, dan bukti sumber dibagikan antarperan. Options Lab dan `options_payoff` menghitung strategi saham plus opsi serta membandingkan beberapa alternatif dalam satu panggilan, dengan biaya, batas laba/rugi, dan arah perbandingan yang eksplisit. Biaya backtest efektif serta status keluaran terpotong atau kesalahan tetap jelas; batas otorisasi trading riil tetap berlaku. **Belum dirilis.**
@@ -184,7 +192,7 @@ Anda juga dapat memilih sumber tertentu. Instal `vibe-trading-ai[ashare]` untuk 
 |---|---|
 | Alpha Zoo | Uji sinyal Qlib, Alpha101, GTJA, serta pustaka akademis dan fundamental. Bandingkan koefisien informasi antarhorizon lalu uji dengan jendela waktu bergulir. |
 | Mesin backtest | Modelkan batas harga saham A, biaya pendanaan kripto, atau margin kontrak berjangka. Gunakan modal bersama lintas pasar dan periksa setiap eksekusi. |
-| Lab opsi | Susun spread per kaki, bandingkan hasil saat jatuh tempo dan Greeks, lalu uji perubahan harga spot dan volatilitas tersirat. |
+| Lab opsi | Susun spread per kaki, bandingkan hasil saat jatuh tempo dan Greeks, lalu uji perubahan harga spot dan volatilitas tersirat. Ekspor permintaan dan hasil analisis yang persis sebagai JSON atau seluruh grid jatuh tempo dan skenario sebagai CSV. Alat `options_strategy_compare` agent/MCP membandingkan hingga empat strategi pada grid spot/IV yang sama dengan P&L relatif terhadap baseline. |
 | Risiko portofolio | Periksa drawdown, VaR, dan expected shortfall. Pisahkan pengaruh alokasi dan pemilihan saham lewat atribusi Brinson dan lihat perubahan korelasi pasar. |
 | Pemantauan strategi | Daftarkan strategi beserta bukti dan pantau perubahan rasio Sharpe atau koefisien informasi faktor saat hasil baru masuk. |
 

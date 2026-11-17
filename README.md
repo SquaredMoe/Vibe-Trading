@@ -26,6 +26,11 @@
 </p>
 
 <p align="center">
+  <a href="https://pepy.tech/projects/vibe-trading-ai"><img src="https://static.pepy.tech/badge/vibe-trading-ai" alt="PyPI total downloads"></a>
+  <img src="https://visitor-badge.laobi.icu/badge?page_id=HKUDS.Vibe-Trading&amp;left_text=README%20views" alt="README views">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Backend-FastAPI-009688?style=flat" alt="FastAPI">
   <img src="https://img.shields.io/badge/Frontend-React%2019-61DAFB?style=flat&logo=react&logoColor=white" alt="React">
@@ -57,17 +62,20 @@
 
 ## 📰 News
 
+- **2026-11-17** 📊 **Portfolio risk details and reusable options analysis** — Risk X-Ray adds observed drawdown periods and signed per-holding volatility contributions. Options Lab exports calculated snapshots as JSON and scenario grids as CSV, and diagnoses observed IV slices with explicit coverage limits; the diagnostics do not certify an arbitrage-free surface. Agent/MCP tools compare named option strategies on shared price and IV grids.
+  Fix malformed update metadata and failed upgrade verification, direct-mode model discovery, attachment filenames, missing-price handling and stale session-list responses. **On `main`, for the next pip release.**
+
 - **2026-11-16** 🛠️ **More reliable reports, memory search and messaging** — Shadow Account reports keep unmeasured P&L unavailable instead of showing zero, including cached HTML/PDF exports. Memory search repairs legacy indexes; partially failed PDF OCR is marked degraded.
   Fix Signal pairing, preserve Napcat text when image metadata is malformed, narrow Anthropic temperature retries to the relevant validation error, and support current and legacy AKShare history endpoints. See [CHANGELOG](CHANGELOG.md). **On `main`, for the next pip release.**
 
 - **2026-11-15** 📡 **Unified market-data gateway and ready-to-use CSVs** — Historical bars and US option snapshots share a [local data gateway](agent/src/data_gateway/README.md) with source fallback, shared caching and bounded concurrency. Responses preserve source, currency and price-adjustment metadata, with explicit coverage and freshness information.
   Agent market-data reads deliver CSVs alongside JSON. For supported requests naming instruments and one explicit `YYYY-MM-DD` range, the runtime constrains dates before acquisition; calculation warmup is requested separately, and existing indicator/backtest lookbacks remain available. **On `main`, for the next pip release.**
 
-- **2026-11-14** 🔌 **Unified LLM gateway and version checks** — Model providers now share one catalog and configuration layer across Agent, CLI, API and Swarm. Client settings stay isolated, native adapters respect explicit proxy settings, and cross-origin redirects are blocked before credentials or request bodies are forwarded.
-  Check for new versions from Web settings. Desktop gains support for signed updates with verification and recovery; distribution requires a configured update feed and publisher certificates. **On `main`, for the next pip release.**
-
 <details>
 <summary>Earlier news</summary>
+
+- **2026-11-14** 🔌 **Unified LLM gateway and version checks** — Model providers now share one catalog and configuration layer across Agent, CLI, API and Swarm. Client settings stay isolated, native adapters respect explicit proxy settings, and cross-origin redirects are blocked before credentials or request bodies are forwarded.
+  Check for new versions from Web settings. Desktop gains support for signed updates with verification and recovery; distribution requires a configured update feed and publisher certificates. **On `main`, for the next pip release.**
 
 - **2026-11-13** 🛠️ **Research delivery and calculation tools** — Research answers stream without automatic numeric redaction, forced rewrites, or format-based completion gates. Interrupted committee runs preserve partial results and can resume unfinished roles while reusing completed work.
   Full market-data references feed shell-free QuantLib calculations, and committee roles share source evidence. Options Lab and `options_payoff` calculate stock-plus-options strategies and compare multiple alternatives in one call, returning explicit costs, payoff bounds, and comparison directions. Effective backtest fees and truncation/error states remain explicit; live-trading authorization limits remain in place. **Unreleased.**
@@ -144,6 +152,14 @@ vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --to
 
 Open **Run Detail** to compare the crossover with buy-and-hold, inspect the trades behind a drawdown and check the data source on the run card.
 
+### Portfolio drawdown periods
+
+In **Run Detail > Portfolio Studio > Risk X-Ray**, inspect the five deepest observed drawdowns, with peak, trough, recovery and duration. A drawdown still open at the end of the input window is reported separately even when it is outside the deepest five. The same `drawdown.episodes` data is saved in `artifacts/risk_xray.json`, summarized in `artifacts/risk_xray.md`, and returned by the `portfolio_risk_xray` Agent/MCP tool.
+
+This is a constant-weight return model, not account NAV, strategy P&L or a forecast. Backtests use the average executed basket weights; the model itself does not include fees or cash flows. Duration counts observed bar intervals from peak to recovery, or to the window's end if unrecovered, not calendar days. Daily, weekly and monthly observations retain their original labels.
+
+A missing interior return or non-positive/non-finite model wealth makes the periods unavailable, rather than an empty set or zero risk. Values within a relative `1e-12` of a running peak are treated as at that peak to avoid an extra recovery bar caused only by floating-point noise; smaller differences are not distinguished. The JSON report declares this as `recovery_rtol`. Existing scalar statistics and older reports without episode metadata remain supported.
+
 ## 🧪 Research Workflow
 
 | Step | In the crossover example |
@@ -184,9 +200,11 @@ You can also choose a source explicitly. For example, installing `vibe-trading-a
 |---|---|
 | Alpha Zoo | Benchmark signals from Qlib, Alpha101, GTJA and the academic and fundamental libraries. Compare information coefficients across horizons, then check whether the result survives a walk-forward test. |
 | Backtest engines | Model A-share price limits, crypto funding or futures margin. Use a shared capital pool for a cross-market strategy and inspect the individual fills behind its returns. |
-| Options Lab | Build a spread leg by leg. Compare its expiry payoff with the Greeks and see how the position responds to a change in spot price and implied volatility. |
-| Portfolio risk | Inspect drawdowns, estimate value at risk and expected shortfall, or use Brinson attribution to separate allocation from stock selection. The correlation view shows when markets start moving together. |
+| Options Lab | Build a spread leg by leg. Compare its expiry payoff with the Greeks and see how the position responds to a change in spot price and implied volatility. Export the exact analysis request and result as JSON or the full expiry and scenario grid as CSV. The `options_strategy_compare` Agent/MCP tool compares up to four strategies on a shared spot/IV grid with baseline-relative P&L. |
+| Portfolio risk | Inspect drawdowns, estimate value at risk and expected shortfall, or use Brinson attribution to separate allocation from stock selection. Risk X-Ray reports each holding's signed contribution to portfolio volatility, including hedges that offset risk. The correlation view shows when markets start moving together. |
 | Strategy tracking | Register a strategy with its evidence and track how its Sharpe ratio or factor information coefficient changes as new results come in. |
+
+Risk X-Ray includes `risk_contributions` in the Agent tool response and saved JSON/Markdown reports. Components use `weight × Cov(asset return, portfolio return) / portfolio volatility`, with the same sample and annualization as total volatility. Each `assets` row names its `symbol`; `risk_contribution` is annualized decimal volatility and `contribution_pct` is in percentage points. They add up to total volatility, not portfolio return. A hedge can have a negative risk share, and another holding can exceed 100%; shares are unavailable for zero volatility or an insufficient sample. This is a historical weighted-basket diagnosis, not realized PnL attribution or a forecast.
 
 ### Accounts and trading
 
@@ -372,7 +390,11 @@ Vibe-Trading is part of the **[HKUDS](https://github.com/HKUDS)** agent ecosyste
 |---|---|---|
 | Paper trading | Daily accounts persist cash, fills and NAV between sessions. A separate simulation replays an A-share session in five-minute steps. | Opt-in volume-share matching ([#2128](https://github.com/HKUDS/Vibe-Trading/pull/2128), draft). |
 | Research | Run cards record metrics and evidence for a completed backtest. Dated research artifacts keep revision history and are searchable. | Structured financial facts in research artifacts ([#2164](https://github.com/HKUDS/Vibe-Trading/pull/2164), in review). |
-| Options Lab | Explore multi-leg payoffs, Greeks and spot × IV scenarios. | Interactive volatility surface grid at `/options`. |
+| Options Lab | Explore multi-leg payoffs, Greeks and spot × IV scenarios; edit IV grids and check observed slices for model-price inconsistencies at `/options`. | These checks do not calibrate or certify an arbitrage-free surface. |
+
+Observed-slice diagnostics use your spot price and continuously compounded risk-free rate and dividend yield to reconstruct European call model prices. They check vertical spread bounds and butterfly convexity within each observed expiry, report incomplete or unavailable coverage, and show up to 20 findings without reducing the check counts. The grid is unchanged. Use the read-only `quantlib_call` function `volatility.diagnose_iv_surface` or `POST /options/volatility-surface/diagnostics` with the same observations and decimal rates. These are model-price checks, not executable quotes or trading advice.
+
+See the [model scope and example](agent/src/skills/options-advanced/SKILL.md#volatility-surface).
 
 ## Contributing
 
